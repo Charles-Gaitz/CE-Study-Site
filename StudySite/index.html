@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & TOKENS ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0c0c0f;
+  --bg2:     #141418;
+  --bg3:     #1c1c22;
+  --bg4:     #242429;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:    #eaeaf0;
+  --text2:   #9494a6;
+  --text3:   #52525e;
+  --accent:  #c8b8ff;
+  --accent2: #8b6cff;
+  --gold:    #f5c842;
+  --teal:    #4ecdc4;
+  --coral:   #ff6b6b;
+  --green:   #69db7c;
+  --blue:    #74c0fc;
+  --orange:  #ffa94d;
+  --r:       12px;
+  --r-lg:    20px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── AMBIENT BACKGROUND ────────────────────────────────────────── */
+.ambient {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.ambient-blob {
+  position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.12;
+}
+.blob-1 { width: 600px; height: 600px; background: var(--accent2); top: -200px; left: -100px; animation: drift1 18s ease-in-out infinite; }
+.blob-2 { width: 400px; height: 400px; background: var(--teal); bottom: -100px; right: -50px; animation: drift2 22s ease-in-out infinite; }
+.blob-3 { width: 300px; height: 300px; background: var(--gold); top: 40%; left: 50%; transform: translate(-50%,-50%); animation: drift3 15s ease-in-out infinite; }
+
+@keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,40px) scale(1.1)} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-40px,-60px) scale(1.08)} }
+@keyframes drift3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.15)} }
+
+/* ─── LAYOUT ────────────────────────────────────────────────────── */
+.page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+/* ─── HEADER ────────────────────────────────────────────────────── */
+header {
+  padding: 5rem 0 4rem;
+  text-align: center;
+}
+
+.kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 1.5rem;
+}
+.kicker-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); opacity: 0.7;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+
+h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin-bottom: 1.2rem;
+  color: var(--text);
+}
+h1 em { color: var(--accent); font-style: italic; }
+
+.header-sub {
+  font-size: 16px; color: var(--text2);
+  max-width: 480px; margin: 0 auto 2.5rem;
+  line-height: 1.7;
+}
+
+/* ─── SEARCH / FILTER BAR ───────────────────────────────────────── */
+.controls {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 620px; margin: 0 auto 3.5rem;
+  flex-wrap: wrap; justify-content: center;
+}
+
+.search-wrap {
+  flex: 1; min-width: 220px;
+  position: relative;
+}
+.search-icon {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3); font-size: 14px; pointer-events: none;
+}
+.search-input {
+  width: 100%; padding: 10px 14px 10px 38px;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 100px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px rgba(139,108,255,.12);
+}
+
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-pill {
+  font-size: 12px; padding: 6px 14px; border-radius: 100px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text2); cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+}
+.filter-pill:hover { background: var(--bg3); color: var(--text); }
+.filter-pill.active {
+  background: rgba(139,108,255,.15);
+  border-color: rgba(139,108,255,.4);
+  color: var(--accent); font-weight: 500;
+}
+
+/* ─── STATS BAR ─────────────────────────────────────────────────── */
+.stats-bar {
+  display: flex; align-items: center; gap: 24px;
+  max-width: 620px; margin: 0 auto 3rem;
+  padding: 0 4px;
+}
+.stat { display: flex; align-items: baseline; gap: 6px; }
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px; font-weight: 500; color: var(--text);
+}
+.stat-label { font-size: 12px; color: var(--text3); }
+.stats-divider { width: 1px; height: 20px; background: var(--border2); }
+
+/* ─── GUIDE GRID ────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 5rem;
+}
+
+/* ─── GUIDE CARD ────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.6rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s ease, border-color .2s, box-shadow .2s;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: var(--r-lg);
+  background: linear-gradient(135deg, rgba(255,255,255,.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border2);
+  box-shadow: 0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(139,108,255,.1);
+}
+.card:hover .card-arrow { transform: translate(3px,-3px); opacity: 1; }
+.card:hover .card-glow { opacity: 1; }
+
+.card-glow {
+  position: absolute; top: -60px; right: -60px;
+  width: 180px; height: 180px; border-radius: 50%;
+  filter: blur(50px); opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+
+.card-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 1rem;
+}
+
+.card-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.card-arrow {
+  font-size: 18px; color: var(--text3);
+  transition: transform .2s, opacity .2s; opacity: 0.4;
+  line-height: 1;
+}
+
+.card-course {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 5px;
+}
+
+.card-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.35rem; font-weight: 400;
+  color: var(--text); line-height: 1.25; margin-bottom: 8px;
+}
+
+.card-desc {
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+  margin-bottom: 1.1rem;
+}
+
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+}
+
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; padding: 3px 9px; border-radius: 100px;
+  border: 1px solid var(--border2); color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.card-meta {
+  font-size: 11px; color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Card accent colors */
+.card-purple .card-icon { background: rgba(139,108,255,.15); color: var(--accent); }
+.card-purple .card-glow { background: var(--accent2); }
+.card-purple:hover { border-color: rgba(139,108,255,.25); }
+
+.card-teal .card-icon { background: rgba(78,205,196,.15); color: var(--teal); }
+.card-teal .card-glow { background: var(--teal); }
+.card-teal:hover { border-color: rgba(78,205,196,.25); }
+
+.card-gold .card-icon { background: rgba(245,200,66,.12); color: var(--gold); }
+.card-gold .card-glow { background: var(--gold); }
+.card-gold:hover { border-color: rgba(245,200,66,.2); }
+
+.card-coral .card-icon { background: rgba(255,107,107,.12); color: var(--coral); }
+.card-coral .card-glow { background: var(--coral); }
+.card-coral:hover { border-color: rgba(255,107,107,.2); }
+
+.card-blue .card-icon { background: rgba(116,192,252,.12); color: var(--blue); }
+.card-blue .card-glow { background: var(--blue); }
+.card-blue:hover { border-color: rgba(116,192,252,.2); }
+
+.card-green .card-icon { background: rgba(105,219,124,.12); color: var(--green); }
+.card-green .card-glow { background: var(--green); }
+.card-green:hover { border-color: rgba(105,219,124,.2); }
+
+/* ─── EMPTY STATE ───────────────────────────────────────────────── */
+.empty-state {
+  grid-column: 1/-1; text-align: center;
+  padding: 4rem 2rem; display: none;
+}
+.empty-state.visible { display: block; }
+.empty-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: .4; }
+.empty-title { font-family: 'Instrument Serif', serif; font-size: 1.5rem; color: var(--text2); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--text3); }
+
+/* ─── ADD NEW CARD ──────────────────────────────────────────────── */
+.card-add {
+  background: transparent;
+  border: 1px dashed var(--border2);
+  border-radius: var(--r-lg);
+  padding: 1.6rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; gap: 10px;
+  min-height: 200px;
+  transition: border-color .2s, background .2s;
+  cursor: default;
+}
+.card-add:hover { border-color: var(--border2); background: var(--bg2); }
+.add-icon { font-size: 1.5rem; opacity: .25; }
+.add-text { font-size: 13px; color: var(--text3); }
+.add-code {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; color: var(--text3);
+}
+
+/* ─── FOOTER ────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.footer-left {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3);
+}
+.footer-right {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3);
+}
+.footer-right a { color: var(--text3); text-decoration: none; }
+.footer-right a:hover { color: var(--text2); }
+
+/* ─── NO RESULT COUNTER ─────────────────────────────────────────── */
+#results-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--text3);
+  transition: opacity .2s;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  header { padding: 3rem 0 2.5rem; }
+  h1 { font-size: 2.5rem; }
+  .stats-bar { gap: 14px; }
+  .stat-num { font-size: 16px; }
+  footer { flex-direction: column; align-items: flex-start; }
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
+  <div class="ambient-blob blob-3"></div>
+</div>
+
+<div class="page">
+
+  <header>
+    <div class="kicker"><div class="kicker-dot"></div>Texas A&amp;M University</div>
+    <h1>Study <em>Hub</em></h1>
+    <p class="header-sub">All your class study guides in one place. Pick a course and start reviewing.</p>
+  </header>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" id="search" placeholder="Search courses…" oninput="filterCards()" autocomplete="off">
+    </div>
+    <div class="filter-group" id="filter-group">
+      <button class="filter-pill active" onclick="setFilter('all',this)">All</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-num" id="stat-guides">0</span><span class="stat-label">guides</span></div>
+    <div class="stats-divider"></div>
+    <div class="stat"><span class="stat-num" id="stat-subjects">0</span><span class="stat-label">subjects</span></div>
+    <div class="stats-divider"></div>
+    <span id="results-count"></span>
+  </div>
+
+  <div class="grid" id="card-grid">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">◎</div>
+      <div class="empty-title">No guides found</div>
+      <div class="empty-sub">Try a different search or filter</div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-left">Study Hub · Texas A&amp;M</span>
+    <span class="footer-right">
+      <a href="https://github.com" target="_blank">GitHub</a> &nbsp;·&nbsp;
+      Hosted on Netlify
+    </span>
+  </footer>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+//  GUIDE REGISTRY
+//  To add a new guide: add one object to this array, drop the HTML
+//  file in the guides/ folder, and you're done.
+//
+//  Fields:
+//    id       – unique slug (used for filtering only)
+//    course   – short course code, e.g. "ACCT 407"
+//    title    – full guide title
+//    desc     – one-sentence description (shown on card)
+//    file     – path to the guide HTML file, relative to index.html
+//    icon     – single emoji for the card icon
+//    color    – card accent: "purple" | "teal" | "gold" | "coral" | "blue" | "green"
+//    tags     – array of short tag strings (shown as pills)
+//    subject  – subject category for filtering, e.g. "Accounting"
+//    sections – number of sections in the guide (shown as meta)
+//    updated  – last-updated string, e.g. "Apr 2025"
+// ════════════════════════════════════════════════════════════════════
+const guides = [
+  {
+    id:       "audit407",
+    course:   "ACCT 407",
+    title:    "Audit & Assurance",
+    desc:     "Full coverage of auditing standards, risk, ICFR, sampling, ethics, and reporting — with interactive calculators and a 28-question practice quiz.",
+    file:     "guides/audit407.html",
+    icon:     "🔍",
+    color:    "purple",
+    tags:     ["15 sections", "28 questions", "calculators"],
+    subject:  "Accounting",
+    sections: 15,
+    updated:  "Apr 2025",
+  },
+  // ─── ADD YOUR NEXT GUIDE HERE ───────────────────────────────────
+  // {
+  //   id:       "finc341",
+  //   course:   "FINC 341",
+  //   title:    "Corporate Finance",
+  //   desc:     "Capital budgeting, WACC, capital structure, and valuation.",
+  //   file:     "guides/finc341.html",
+  //   icon:     "📈",
+  //   color:    "teal",
+  //   tags:     ["10 sections", "20 questions"],
+  //   subject:  "Finance",
+  //   sections: 10,
+  //   updated:  "May 2025",
+  // },
+];
+
+// ─── Derived state ──────────────────────────────────────────────────
+let activeFilter = 'all';
+
+// ─── Build filter pills from unique subjects ────────────────────────
+function buildFilters() {
+  const subjects = [...new Set(guides.map(g => g.subject))].sort();
+  const group = document.getElementById('filter-group');
+  subjects.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill';
+    btn.textContent = s;
+    btn.onclick = () => setFilter(s, btn);
+    group.appendChild(btn);
+  });
+}
+
+// ─── Update stats bar ───────────────────────────────────────────────
+function updateStats(visibleCount) {
+  const subjects = new Set(guides.map(g => g.subject));
+  document.getElementById('stat-guides').textContent = guides.length;
+  document.getElementById('stat-subjects').textContent = subjects.size;
+  const rc = document.getElementById('results-count');
+  if (visibleCount < guides.length) {
+    rc.textContent = `${visibleCount} shown`;
+  } else {
+    rc.textContent = '';
+  }
+}
+
+// ─── Render cards ───────────────────────────────────────────────────
+function renderCards(list) {
+  const grid = document.getElementById('card-grid');
+  const empty = document.getElementById('empty-state');
+
+  // Remove all cards (keep empty state and add card)
+  grid.querySelectorAll('a.card, .card-add').forEach(el => el.remove());
+
+  if (list.length === 0) {
+    empty.classList.add('visible');
+    updateStats(0);
+    return;
+  }
+  empty.classList.remove('visible');
+
+  list.forEach(g => {
+    const a = document.createElement('a');
+    a.href = g.file;
+    a.className = `card card-${g.color}`;
+    a.setAttribute('data-id', g.id);
+    a.setAttribute('data-subject', g.subject);
+    a.innerHTML = `
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">${g.icon}</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-course">${g.course}</div>
+      <div class="card-title">${g.title}</div>
+      <div class="card-desc">${g.desc}</div>
+      <div class="card-footer">
+        <div class="card-tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-meta">Updated ${g.updated}</div>
+      </div>
+    `;
+    grid.insertBefore(a, empty);
+  });
+
+  // Always append the "add new" placeholder card at the end
+  const addCard = document.createElement('div');
+  addCard.className = 'card-add';
+  addCard.innerHTML = `
+    <div class="add-icon">+</div>
+    <div class="add-text">Add a new guide</div>
+    <div class="add-code">guides/yourcourse.html</div>
+  `;
+  grid.insertBefore(addCard, empty);
+
+  updateStats(list.length);
+}
+
+// ─── Filter logic ───────────────────────────────────────────────────
+function getFiltered() {
+  const query = document.getElementById('search').value.toLowerCase().trim();
+  return guides.filter(g => {
+    const matchesFilter = activeFilter === 'all' || g.subject === activeFilter;
+    const matchesSearch = !query ||
+      g.course.toLowerCase().includes(query) ||
+      g.title.toLowerCase().includes(query) ||
+      g.desc.toLowerCase().includes(query) ||
+      g.tags.some(t => t.toLowerCase().includes(query)) ||
+      g.subject.toLowerCase().includes(query);
+    return matchesFilter && matchesSearch;
+  });
+}
+
+function filterCards() {
+  renderCards(getFiltered());
+}
+
+function setFilter(subject, btn) {
+  activeFilter = subject;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCards();
+}
+
+// ─── Init ───────────────────────────────────────────────────────────
+buildFilters();
+renderCards(guides);
+</script>
+
+</body>
+</html>
